@@ -2,3 +2,6 @@ node_modules/
 .env
 data/
 config/clinic.backup.json
+
+# raw screenshots (cropped versions are in images/)
+screenshots/

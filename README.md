@@ -7,6 +7,28 @@ It runs on **plain Node.js with zero external dependencies**: no `npm install` n
 > 📖 Detailed setup guide (Romanian): [README.ro.md](README.ro.md)
 > The clinic in `config/clinic.json` ("Clinica Dentară Zâmbet") is a fictional demo clinic.
 
+![Demo website with the chat assistant open](images/demo-page.png)
+
+---
+
+## 📸 Screenshots
+
+**Booking an appointment, step by step:** choose the service, then the day, then the time.
+
+![Booking flow: service, day, time](images/booking-flow-1.png)
+
+**Name and phone, summary, confirmation:** the patient gets a booking code.
+
+![Booking flow: details, summary, confirmation](images/booking-flow-2.png)
+
+**Admin panel: appointments**, with a live list of bookings from the website and WhatsApp.
+
+![Admin panel with the list of appointments](images/admin-bookings.png)
+
+**Admin panel: services and prices**, editable without touching the code. The keywords help the bot recognise each service.
+
+![Admin panel with services, prices and keywords](images/admin-services.png)
+
 ---
 
 ## ✨ Features
