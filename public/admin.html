@@ -1,0 +1,903 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Administrare chatbot</title>
+  <style>
+    :root {
+      --c: #0f766e; --c-dark: #0b5a54; --c-soft: #e7f3f1; --ink: #13201f; --muted: #607270; --line: #e3e9e8;
+      --bg: #f4f7f6; --card: #fff; --red: #c2253c; --red-soft: #fdecef; --amber: #a15c07; --amber-soft: #fdf3e2; --blue: #2457c5; --blue-soft: #e8effc;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: var(--bg); font-size: 14.5px; line-height: 1.45; }
+    button, input, select, textarea { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    .hidden { display: none !important; }
+
+    /* login */
+    .login { min-height: 100vh; display: grid; place-items: center; padding: 20px; }
+    .login form { background: var(--card); padding: 36px; border-radius: 20px; width: 100%; max-width: 380px; box-shadow: 0 20px 50px -20px rgba(0,0,0,.2); }
+    .login h1 { font-size: 22px; margin-bottom: 6px; }
+    .login p { color: var(--muted); margin-bottom: 22px; }
+
+    /* layout */
+    .app { display: grid; grid-template-columns: 236px 1fr; min-height: 100vh; }
+    aside { background: var(--ink); color: #cfdcda; padding: 22px 14px; position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; }
+    aside .brand { color: #fff; font-weight: 650; font-size: 16px; padding: 0 10px 22px; display: flex; gap: 10px; align-items: center; }
+    aside .brand span { width: 30px; height: 30px; border-radius: 9px; background: var(--c); display: grid; place-items: center; }
+    aside nav button { display: flex; width: 100%; align-items: center; gap: 10px; text-align: left; background: none; border: 0; color: inherit; padding: 10px 12px; border-radius: 10px; margin-bottom: 2px; }
+    aside nav button:hover { background: rgba(255,255,255,.06); }
+    aside nav button.active { background: rgba(255,255,255,.1); color: #fff; }
+    aside nav .count { margin-left: auto; background: #e11d48; color: #fff; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 10px; }
+    aside .foot { margin-top: auto; font-size: 12.5px; padding: 0 10px; color: #8ba3a0; }
+    aside .foot a { color: #cfdcda; }
+    aside .pill-status { display: block; margin-top: 6px; }
+    main { padding: 28px 32px 80px; min-width: 0; }
+    h2 { font-size: 22px; margin-bottom: 4px; }
+    .sub { color: var(--muted); margin-bottom: 22px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; margin-bottom: 18px; }
+    .card h3 { font-size: 15.5px; margin-bottom: 4px; }
+    .card .hint { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    label.f { display: block; font-size: 13px; font-weight: 600; color: #3c4d4b; }
+    label.f input, label.f select, label.f textarea { margin-top: 5px; }
+    label.f small { display: block; font-weight: 400; color: var(--muted); margin-top: 4px; }
+    input[type=text], input[type=number], input[type=date], input[type=time], input[type=password], input[type=tel], input[type=search], select, textarea {
+      width: 100%; border: 1px solid #cfd9d7; border-radius: 10px; padding: 9px 11px; background: #fff; outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--c); box-shadow: 0 0 0 3px var(--c-soft); }
+    textarea { resize: vertical; min-height: 80px; }
+    .btn { border: 0; border-radius: 10px; padding: 9px 16px; font-weight: 600; background: var(--c-soft); color: var(--c-dark); white-space: nowrap; }
+    .btn:hover { filter: brightness(.97); }
+    .btn.primary { background: var(--c); color: #fff; }
+    .btn.danger { background: var(--red-soft); color: var(--red); }
+    .btn.small { padding: 5px 10px; font-size: 13px; border-radius: 8px; }
+    .btn.icon { padding: 6px 9px; background: transparent; color: var(--muted); }
+    .btn.icon:hover { background: var(--bg); color: var(--red); }
+    .savebar { position: sticky; bottom: 16px; display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
+    .savebar .btn { box-shadow: 0 8px 24px -8px rgba(0,0,0,.3); padding: 12px 22px; }
+
+    /* stats */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }
+    .stat { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; }
+    .stat b { display: block; font-size: 26px; font-weight: 650; font-variant-numeric: tabular-nums; }
+    .stat span { color: var(--muted); font-size: 13px; }
+
+    /* table */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 600; padding: 10px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    td { padding: 11px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    tr:last-child td { border-bottom: 0; }
+    tr.new td { background: #f1fbf8; }
+    tr.past td { color: var(--muted); }
+    td.nowrap { white-space: nowrap; }
+    td a { color: var(--c-dark); }
+    .pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+    .pill.confirmed { background: var(--c-soft); color: var(--c-dark); }
+    .pill.cancelled { background: var(--red-soft); color: var(--red); }
+    .pill.completed { background: var(--blue-soft); color: var(--blue); }
+    .pill.no-show { background: var(--amber-soft); color: var(--amber); }
+    .pill.on { background: #dcfce7; color: #166534; }
+    .pill.off { background: #eef1f1; color: var(--muted); }
+    .empty { text-align: center; color: var(--muted); padding: 36px 10px; }
+
+    /* weekly editor */
+    .day { display: grid; grid-template-columns: 120px 110px 1fr; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px dashed var(--line); }
+    .day:last-child { border: 0; }
+    .day .name { font-weight: 600; }
+    .intervals { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .iv { display: flex; align-items: center; gap: 4px; background: var(--bg); border-radius: 10px; padding: 4px 4px 4px 8px; }
+    .iv input { width: 124px; padding: 5px 7px; }
+    .closed-label { color: var(--muted); font-style: italic; }
+    .switch { position: relative; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: var(--muted); }
+    .switch input { appearance: none; width: 36px; height: 20px; border-radius: 10px; background: #cfd9d7; position: relative; transition: background .2s; cursor: pointer; flex-shrink: 0; }
+    .switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .2s; }
+    .switch input:checked { background: var(--c); }
+    .switch input:checked::after { transform: translateX(16px); }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 4px 6px 4px 12px; font-size: 13px; }
+    .chip button { border: 0; background: none; width: 20px; height: 20px; border-radius: 50%; color: var(--muted); line-height: 1; }
+    .chip button:hover { background: var(--red-soft); color: var(--red); }
+    .chip.past { opacity: .5; }
+
+    .preview td small { color: var(--muted); }
+    .bar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; width: 90px; display: inline-block; vertical-align: middle; margin-right: 8px; }
+    .bar i { display: block; height: 100%; background: var(--c); }
+
+    .svc-table input, .svc-table textarea { padding: 6px 8px; font-size: 13.5px; }
+    .svc-table textarea { min-height: 38px; }
+    .faq-item { border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 12px; display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+
+    .msg { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; display: flex; gap: 14px; align-items: flex-start; }
+    .msg.handled { opacity: .55; }
+    .msg .meta { font-size: 12.5px; color: var(--muted); margin-bottom: 4px; }
+    .msg .body { flex: 1; white-space: pre-wrap; }
+
+    .modal { position: fixed; inset: 0; background: rgba(10,20,19,.45); display: grid; place-items: center; padding: 20px; z-index: 50; }
+    .modal .card { width: 100%; max-width: 560px; margin: 0; }
+
+    .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 12px 20px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.25); z-index: 100; max-width: 90vw; }
+    .toast.err { background: var(--red); }
+    .errors { background: var(--red-soft); color: var(--red); border-radius: 12px; padding: 12px 16px; margin-bottom: 14px; font-size: 13.5px; }
+    .errors li { margin-left: 18px; }
+
+    @media (max-width: 900px) {
+      .app { grid-template-columns: 1fr; }
+      aside { position: static; height: auto; }
+      aside nav { display: flex; flex-wrap: wrap; gap: 4px; }
+      aside nav button { width: auto; }
+      aside .foot { display: none; }
+      main { padding: 20px 16px 80px; }
+      .stats, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .grid-2 { grid-template-columns: 1fr; }
+      .day { grid-template-columns: 1fr; gap: 6px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ───────── Autentificare ───────── -->
+<div class="login" id="login">
+  <form id="loginForm">
+    <h1>🦷 Administrare chatbot</h1>
+    <p>Introduceți parola setată în fișierul <b>.env</b> (ADMIN_PASSWORD).</p>
+    <label class="f">Parolă<input type="password" id="password" autocomplete="current-password" required autofocus></label>
+    <div id="loginErr" class="errors hidden" style="margin-top:14px"></div>
+    <button class="btn primary" style="width:100%;margin-top:16px;padding:12px">Intră</button>
+  </form>
+</div>
+
+<!-- ───────── Aplicație ───────── -->
+<div class="app hidden" id="app">
+  <aside>
+    <div class="brand"><span>✦</span><span id="brandName" style="background:none;width:auto;height:auto">Clinica</span></div>
+    <nav id="nav">
+      <button data-tab="bookings" class="active">📅 Programări <span class="count hidden" id="newCount"></span></button>
+      <button data-tab="schedule">🕘 Program și zile</button>
+      <button data-tab="services">🦷 Servicii și prețuri</button>
+      <button data-tab="faq">💬 Întrebări frecvente</button>
+      <button data-tab="messages">✉️ Mesaje <span class="count hidden" id="msgCount"></span></button>
+      <button data-tab="clinic">🏥 Date clinică</button>
+      <button data-tab="advanced">⚙️ Avansat</button>
+    </nav>
+    <div class="foot">
+      <div>WhatsApp: <span id="stWa" class="pill off">—</span></div>
+      <div style="margin-top:6px">Răspunsuri AI: <span id="stAi" class="pill off">—</span></div>
+      <div style="margin-top:14px"><a href="/" target="_blank">Deschide demo-ul ↗</a></div>
+      <div style="margin-top:6px"><a href="#" id="logout">Ieșire</a></div>
+    </div>
+  </aside>
+
+  <main>
+    <!-- Programări -->
+    <section data-panel="bookings">
+      <h2>Programări</h2>
+      <p class="sub">Programările făcute prin chatbot (site și WhatsApp) și cele adăugate manual. Se actualizează automat.</p>
+      <div class="stats">
+        <div class="stat"><b id="sToday">0</b><span>astăzi</span></div>
+        <div class="stat"><b id="sWeek">0</b><span>următoarele 7 zile</span></div>
+        <div class="stat"><b id="sNew">0</b><span>noi în ultimele 24 h</span></div>
+        <div class="stat"><b id="sCancel">0</b><span>anulate (30 zile)</span></div>
+      </div>
+      <div class="card">
+        <div class="row" style="margin-bottom:14px">
+          <select id="bFilter" style="width:auto">
+            <option value="upcoming">Viitoare</option>
+            <option value="today">Astăzi</option>
+            <option value="past">Trecute</option>
+            <option value="cancelled">Anulate</option>
+            <option value="all">Toate</option>
+          </select>
+          <input type="search" id="bSearch" placeholder="Caută nume, telefon, cod…" style="max-width:280px">
+          <span style="flex:1"></span>
+          <button class="btn primary" id="addBookingBtn">+ Programare manuală</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Data</th><th>Ora</th><th>Pacient</th><th>Telefon</th><th>Serviciu</th><th>Sursă</th><th>Cod</th><th>Status</th><th></th></tr></thead>
+            <tbody id="bookingRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Program -->
+    <section data-panel="schedule" class="hidden">
+      <h2>Program și zile disponibile</h2>
+      <p class="sub">Aici stabiliți în ce zile și la ce ore poate botul să facă programări. Modificările se aplică imediat după salvare.</p>
+      <div id="schedErrors" class="errors hidden"></div>
+
+      <div class="card">
+        <h3>Setări generale</h3>
+        <p class="hint">Cum se împart orele în intervale de programare.</p>
+        <div class="grid-4">
+          <label class="f">Interval între programări (min)<input type="number" id="slotMinutes" min="5" max="240" step="5"><small>ex: 30 → 09:00, 09:30, 10:00…</small></label>
+          <label class="f">Pacienți în același timp<input type="number" id="capacity" min="1" max="50"><small>nr. de medici / scaune</small></label>
+          <label class="f">Programări cu câte zile înainte<input type="number" id="bookingWindowDays" min="1" max="365"><small>botul oferă doar zilele din acest interval</small></label>
+          <label class="f">Preaviz minim (ore)<input type="number" id="minNoticeHours" min="0" max="168" step="0.5"><small>ex: 2 → nu se poate rezerva în următoarele 2 ore</small></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Programul săptămânal</h3>
+        <p class="hint">Programul obișnuit. Adăugați mai multe intervale pentru pauza de prânz (ex: 09:00–13:00 și 14:00–19:00).</p>
+        <div id="weekly"></div>
+      </div>
+
+      <div class="card">
+        <h3>Zile închise (sărbători, concediu)</h3>
+        <p class="hint">În aceste zile botul nu face programări. Puteți adăuga o singură zi sau o perioadă.</p>
+        <div class="row">
+          <label class="f" style="width:170px">De la<input type="date" id="closedFrom"></label>
+          <label class="f" style="width:170px">Până la (opțional)<input type="date" id="closedTo"></label>
+          <button class="btn" id="addClosed" style="margin-top:20px">+ Adaugă</button>
+        </div>
+        <div class="chips" id="closedList"></div>
+      </div>
+
+      <div class="card">
+        <h3>Program special pe anumite zile</h3>
+        <p class="hint">Pentru zile cu alt program decât cel obișnuit (ex: Ajunul Crăciunului 09:00–12:00, sau o duminică în care lucrați).</p>
+        <div class="row">
+          <label class="f" style="width:170px">Data<input type="date" id="specialDate"></label>
+          <label class="f" style="width:150px">De la<input type="time" id="specialFrom" value="09:00"></label>
+          <label class="f" style="width:150px">Până la<input type="time" id="specialTo" value="13:00"></label>
+          <button class="btn" id="addSpecial" style="margin-top:20px">+ Adaugă</button>
+        </div>
+        <div class="chips" id="specialList"></div>
+      </div>
+
+      <div class="card">
+        <h3>Doar anumite zile <span class="pill off" id="onlyDatesState">inactiv</span></h3>
+        <p class="hint">Opțional. Dacă adăugați zile aici, botul va oferi <b>DOAR</b> aceste zile (cu orele din programul săptămânal sau special). Util dacă medicul vine doar în anumite date. Lăsați gol pentru a folosi programul săptămânal normal.</p>
+        <div class="row">
+          <label class="f" style="width:170px">Data<input type="date" id="onlyDate"></label>
+          <button class="btn" id="addOnly" style="margin-top:20px">+ Adaugă</button>
+          <button class="btn danger" id="clearOnly" style="margin-top:20px">Golește lista</button>
+        </div>
+        <div class="chips" id="onlyList"></div>
+      </div>
+
+      <div class="savebar"><button class="btn primary" id="saveSchedule">💾 Salvează programul</button></div>
+
+      <div class="card preview" style="margin-top:22px">
+        <div class="row" style="justify-content:space-between;margin-bottom:10px">
+          <div><h3>Previzualizare: ce vede pacientul</h3><p class="hint" style="margin:0">Disponibilitatea în următoarele 14 zile, după programul salvat.</p></div>
+          <select id="previewService" style="width:auto"></select>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>Zi</th><th>Status</th><th>Program</th><th>Ore libere</th><th>Programări</th></tr></thead><tbody id="previewRows"></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- Servicii -->
+    <section data-panel="services" class="hidden">
+      <h2>Servicii și prețuri</h2>
+      <p class="sub">Motivele pe care pacienții le pot alege la programare. Durata contează: un serviciu de 60 min ocupă două intervale de 30 min. Pe WhatsApp apar maximum 10 servicii.</p>
+      <div id="svcErrors" class="errors hidden"></div>
+      <div class="card table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>Activ</th><th>Emoji</th><th>Nume</th><th>Nume scurt</th><th>Durată (min)</th><th>Preț de la</th><th>Preț până la</th><th>Descriere</th><th>Cuvinte cheie</th><th></th></tr></thead>
+          <tbody id="svcRows"></tbody>
+        </table>
+        <button class="btn" id="addSvc" style="margin-top:12px">+ Adaugă serviciu</button>
+      </div>
+      <div class="savebar"><button class="btn primary" id="saveServices">💾 Salvează serviciile</button></div>
+    </section>
+
+    <!-- FAQ -->
+    <section data-panel="faq" class="hidden">
+      <h2>Întrebări frecvente</h2>
+      <p class="sub">Când mesajul pacientului conține unul dintre cuvintele cheie, botul trimite răspunsul. Puteți folosi {address}, {phone}, {email}, {mapsUrl}, {name}. Scrieți *text* pentru îngroșat.</p>
+      <div id="faqList"></div>
+      <button class="btn" id="addFaq">+ Adaugă întrebare</button>
+      <div class="savebar"><button class="btn primary" id="saveFaq">💾 Salvează întrebările</button></div>
+    </section>
+
+    <!-- Mesaje -->
+    <section data-panel="messages" class="hidden">
+      <h2>Mesaje pentru recepție</h2>
+      <p class="sub">Mesajele lăsate de pacienți prin chatbot, care așteaptă să fie sunați înapoi.</p>
+      <div class="card" id="msgList"></div>
+    </section>
+
+    <!-- Clinică -->
+    <section data-panel="clinic" class="hidden">
+      <h2>Date clinică</h2>
+      <p class="sub">Informațiile pe care botul le folosește în răspunsuri.</p>
+      <div id="clinicErrors" class="errors hidden"></div>
+      <div class="card">
+        <div class="grid-2">
+          <label class="f">Numele clinicii<input type="text" data-c="name"></label>
+          <label class="f">Numele asistentului virtual<input type="text" data-c="botName"><small>ex: Ana</small></label>
+          <label class="f">Adresa<input type="text" data-c="address"></label>
+          <label class="f">Link Google Maps<input type="text" data-c="mapsUrl"></label>
+          <label class="f">Telefon recepție<input type="tel" data-c="phone"></label>
+          <label class="f">Telefon urgențe<input type="tel" data-c="urgentPhone"></label>
+          <label class="f">Email<input type="text" data-c="email"></label>
+          <label class="f">Site web<input type="text" data-c="website"></label>
+          <label class="f">Prefix cod programare<input type="text" data-c="bookingCodePrefix" maxlength="4"><small>2–4 litere, ex: ZB → ZB-7K2M</small></label>
+          <label class="f">Monedă<input type="text" data-c="currency"></label>
+        </div>
+      </div>
+      <div class="savebar"><button class="btn primary" id="saveClinic">💾 Salvează</button></div>
+    </section>
+
+    <!-- Avansat -->
+    <section data-panel="advanced" class="hidden">
+      <h2>Configurare avansată</h2>
+      <p class="sub">Întreaga configurație în format JSON (fișierul <b>config/clinic.json</b>). La fiecare salvare se păstrează o copie de siguranță în <b>config/clinic.backup.json</b>.</p>
+      <div id="jsonErrors" class="errors hidden"></div>
+      <div class="card"><textarea id="jsonEditor" spellcheck="false" style="min-height:520px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px"></textarea></div>
+      <div class="savebar">
+        <button class="btn" id="downloadJson">⬇️ Descarcă copie</button>
+        <button class="btn primary" id="saveJson">💾 Salvează JSON</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Programare manuală -->
+<div class="modal hidden" id="bookingModal">
+  <form class="card" id="bookingForm">
+    <h3 style="margin-bottom:14px">Programare manuală</h3>
+    <div id="bfErrors" class="errors hidden"></div>
+    <div class="grid-2">
+      <label class="f">Serviciu<select id="bfService"></select></label>
+      <label class="f">Data<input type="date" id="bfDate" required></label>
+      <label class="f">Ora<select id="bfTime"></select><small id="bfTimeHint"></small></label>
+      <label class="f">Sau oră personalizată<input type="time" id="bfTimeCustom"></label>
+      <label class="f">Nume pacient<input type="text" id="bfName" required></label>
+      <label class="f">Telefon<input type="tel" id="bfPhone" required></label>
+    </div>
+    <label class="f" style="margin-top:14px">Observații<textarea id="bfNotes" style="min-height:60px"></textarea></label>
+    <label class="switch" style="margin-top:12px"><input type="checkbox" id="bfForce"> Forțează (chiar dacă intervalul nu e liber)</label>
+    <div class="row" style="justify-content:flex-end;margin-top:18px">
+      <button type="button" class="btn" id="bfCancel">Renunță</button>
+      <button class="btn primary">Salvează programarea</button>
+    </div>
+  </form>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const DAYS = [['luni', 'Luni'], ['marti', 'Marți'], ['miercuri', 'Miercuri'], ['joi', 'Joi'], ['vineri', 'Vineri'], ['sambata', 'Sâmbătă'], ['duminica', 'Duminică']];
+  const WD = ['Dum', 'Lun', 'Mar', 'Mie', 'Joi', 'Vin', 'Sâm'];
+  const MONTHS = ['ian', 'feb', 'mar', 'apr', 'mai', 'iun', 'iul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+  const STATUS = { confirmed: 'Confirmată', cancelled: 'Anulată', completed: 'Finalizată', 'no-show': 'Neprezentat' };
+  const SOURCE = { web: '🌐 Site', whatsapp: '🟢 WhatsApp', admin: '🏥 Recepție' };
+
+  let token = null;
+  try { token = sessionStorage.getItem('adm-token'); } catch (e) {}
+  let cfg = null, bookings = [], messages = [], today = '';
+  let seenIds = null;
+
+  function fmtDate(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    const wd = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+    return `${WD[wd]}, ${d} ${MONTHS[m - 1]}`;
+  }
+  function addDays(iso, n) {
+    const [y, m, d] = iso.split('-').map(Number);
+    const dt = new Date(Date.UTC(y, m - 1, d + n));
+    return dt.toISOString().slice(0, 10);
+  }
+  function toast(msg, err) {
+    const t = document.createElement('div');
+    t.className = 'toast' + (err ? ' err' : '');
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3200);
+  }
+  function showErrors(el, errors) {
+    if (!el) return errors && errors.length && toast(errors.join(' · '), true);
+    if (!errors || !errors.length) return el.classList.add('hidden');
+    el.innerHTML = '<b>Nu am putut salva:</b><ul>' + errors.map((e) => `<li>${esc(e)}</li>`).join('') + '</ul>';
+    el.classList.remove('hidden');
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  async function api(path, opts = {}) {
+    const res = await fetch(path, {
+      ...opts,
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token, ...(opts.headers || {}) },
+      body: opts.body ? JSON.stringify(opts.body) : undefined,
+    });
+    if (res.status === 401 && path !== '/api/admin/login') { logout(); throw new Error('Sesiunea a expirat'); }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw Object.assign(new Error(data.error || 'Eroare'), { data, status: res.status });
+    return data;
+  }
+
+  // ── login ──
+  $('#loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+      const r = await api('/api/admin/login', { method: 'POST', body: { password: $('#password').value } });
+      token = r.token;
+      try { sessionStorage.setItem('adm-token', token); } catch (e) {}
+      start();
+    } catch (err) {
+      $('#loginErr').textContent = err.message;
+      $('#loginErr').classList.remove('hidden');
+    }
+  });
+  function logout() {
+    token = null;
+    try { sessionStorage.removeItem('adm-token'); } catch (e) {}
+    $('#app').classList.add('hidden');
+    $('#login').classList.remove('hidden');
+  }
+  $('#logout').addEventListener('click', (e) => { e.preventDefault(); logout(); });
+
+  // ── navigare ──
+  $('#nav').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-tab]');
+    if (!b) return;
+    $$('#nav button').forEach((x) => x.classList.toggle('active', x === b));
+    $$('main section').forEach((s) => s.classList.toggle('hidden', s.dataset.panel !== b.dataset.tab));
+    if (b.dataset.tab === 'schedule') loadPreview();
+    if (b.dataset.tab === 'advanced') $('#jsonEditor').value = JSON.stringify(cfg, null, 2);
+  });
+
+  async function start() {
+    $('#login').classList.add('hidden');
+    $('#app').classList.remove('hidden');
+    try {
+      const st = await api('/api/admin/status');
+      today = st.today;
+      $('#stWa').textContent = st.whatsapp ? 'conectat' : 'neconfigurat';
+      $('#stWa').className = 'pill ' + (st.whatsapp ? 'on' : 'off');
+      $('#stAi').textContent = st.ai ? 'active' : 'oprite';
+      $('#stAi').className = 'pill ' + (st.ai ? 'on' : 'off');
+      cfg = await api('/api/admin/config');
+      renderAll();
+      await refresh();
+      setInterval(refresh, 30000);
+    } catch (e) { if (e.status !== 401) toast(e.message, true); }
+  }
+
+  function renderAll() {
+    $('#brandName').textContent = cfg.clinic.name;
+    renderSchedule();
+    renderServices();
+    renderFaq();
+    renderClinic();
+    const opts = cfg.services.filter((s) => s.active !== false).map((s) => `<option value="${esc(s.id)}">${esc(s.emoji || '')} ${esc(s.name)}</option>`).join('');
+    $('#previewService').innerHTML = opts;
+    $('#bfService').innerHTML = opts;
+  }
+
+  async function saveConfig(newCfg, errEl) {
+    try {
+      const r = await api('/api/admin/config', { method: 'PUT', body: newCfg });
+      cfg = r.config;
+      renderAll();
+      errEl && errEl.classList.add('hidden');
+      toast('✅ Salvat. Botul folosește deja noile setări.');
+      return true;
+    } catch (e) {
+      showErrors(errEl, e.data && e.data.details && e.data.details.length ? e.data.details : [e.message]);
+      return false;
+    }
+  }
+  const clone = () => JSON.parse(JSON.stringify(cfg));
+
+  // ───────── Programări ─────────
+  async function refresh() {
+    try {
+      [bookings, messages] = await Promise.all([api('/api/admin/bookings'), api('/api/admin/messages')]);
+    } catch (e) { return; }
+    const known = seenIds || new Set(bookings.map((b) => b.id));
+    const fresh = bookings.filter((b) => !known.has(b.id) && b.status === 'confirmed');
+    if (seenIds && fresh.length) {
+      toast(`🆕 ${fresh.length === 1 ? 'Programare nouă' : fresh.length + ' programări noi'}: ${fresh.map((b) => b.name).join(', ')}`);
+      beep();
+    }
+    seenIds = new Set(bookings.map((b) => b.id));
+    renderBookings();
+    renderMessages();
+  }
+
+  /** Sunet scurt la o programare nouă (pentru recepție). */
+  function beep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [0, 0.18].forEach((t, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.frequency.value = i ? 1046 : 784;
+        g.gain.setValueAtTime(0.0001, ctx.currentTime + t);
+        g.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + t + 0.16);
+        o.connect(g).connect(ctx.destination);
+        o.start(ctx.currentTime + t);
+        o.stop(ctx.currentTime + t + 0.18);
+      });
+    } catch (e) {}
+  }
+
+  function renderBookings() {
+    const dayAgo = Date.now() - 864e5;
+    const active = bookings.filter((b) => b.status === 'confirmed');
+    $('#sToday').textContent = active.filter((b) => b.date === today).length;
+    $('#sWeek').textContent = active.filter((b) => b.date >= today && b.date <= addDays(today, 7)).length;
+    const newOnes = bookings.filter((b) => new Date(b.createdAt).getTime() > dayAgo && b.channel !== 'admin');
+    $('#sNew').textContent = newOnes.length;
+    $('#sCancel').textContent = bookings.filter((b) => b.status === 'cancelled' && b.date >= addDays(today, -30)).length;
+    $('#newCount').textContent = newOnes.length;
+    $('#newCount').classList.toggle('hidden', !newOnes.length);
+    document.title = (newOnes.length ? `(${newOnes.length}) ` : '') + 'Administrare chatbot';
+
+    const f = $('#bFilter').value;
+    const q = $('#bSearch').value.trim().toLowerCase();
+    let list = bookings.filter((b) => {
+      if (f === 'upcoming') return b.status !== 'cancelled' && b.date >= today;
+      if (f === 'today') return b.date === today;
+      if (f === 'past') return b.date < today;
+      if (f === 'cancelled') return b.status === 'cancelled';
+      return true;
+    });
+    if (q) list = list.filter((b) => [b.name, b.phone, b.code, b.serviceName].join(' ').toLowerCase().includes(q));
+    if (f === 'past' || f === 'cancelled') list = list.slice().reverse();
+
+    $('#bookingRows').innerHTML = list.length
+      ? list.map((b) => `
+        <tr class="${new Date(b.createdAt).getTime() > dayAgo && b.channel !== 'admin' ? 'new' : ''} ${b.date < today ? 'past' : ''}">
+          <td class="nowrap"><b>${fmtDate(b.date)}</b></td>
+          <td class="nowrap">${esc(b.time)}<br><small style="color:var(--muted)">${b.duration} min</small></td>
+          <td>${esc(b.name)}${b.patientType === 'new' ? ' <span class="pill confirmed">nou</span>' : ''}${b.notes ? `<br><small style="color:var(--muted)">${esc(b.notes)}</small>` : ''}</td>
+          <td class="nowrap"><a href="tel:${esc(b.phone)}">${esc(b.phone)}</a></td>
+          <td>${esc(b.serviceName)}</td>
+          <td class="nowrap">${SOURCE[b.channel] || esc(b.channel)}</td>
+          <td class="nowrap"><code>${esc(b.code)}</code></td>
+          <td><span class="pill ${esc(b.status)}">${STATUS[b.status] || esc(b.status)}</span></td>
+          <td><select data-status="${esc(b.id)}" style="width:auto;padding:5px 8px;font-size:13px">
+            <option value="">Acțiuni…</option>
+            ${b.status !== 'confirmed' ? '<option value="confirmed">↩️ Reactivează</option>' : ''}
+            ${b.status !== 'completed' ? '<option value="completed">✔️ Finalizată</option>' : ''}
+            ${b.status !== 'no-show' ? '<option value="no-show">⚠️ Neprezentat</option>' : ''}
+            ${b.status !== 'cancelled' ? '<option value="cancelled">✖️ Anulează</option>' : ''}
+          </select></td>
+        </tr>`).join('')
+      : '<tr><td colspan="9" class="empty">Nicio programare de afișat.</td></tr>';
+  }
+  $('#bFilter').addEventListener('change', renderBookings);
+  $('#bSearch').addEventListener('input', renderBookings);
+  $('#bookingRows').addEventListener('change', async (e) => {
+    const sel = e.target.closest('select[data-status]');
+    if (!sel || !sel.value) return;
+    const b = bookings.find((x) => x.id === sel.dataset.status);
+    if (sel.value === 'cancelled' && !confirm(`Anulați programarea lui ${b.name} din ${fmtDate(b.date)}, ora ${b.time}?\n\nIntervalul va deveni din nou liber în chatbot. Nu uitați să anunțați pacientul.`)) { sel.value = ''; return; }
+    try {
+      await api('/api/admin/bookings/' + b.id, { method: 'PATCH', body: { status: sel.value } });
+      toast('Status actualizat');
+      refresh();
+    } catch (err) { toast(err.message, true); }
+  });
+
+  // programare manuală
+  let previewCache = [];
+  async function updateTimeOptions() {
+    const date = $('#bfDate').value, service = $('#bfService').value;
+    if (!date) return;
+    try {
+      previewCache = await api(`/api/admin/preview?service=${encodeURIComponent(service)}&days=60`);
+    } catch (e) { return; }
+    const day = previewCache.find((d) => d.date === date);
+    const slots = day ? day.slots : [];
+    $('#bfTime').innerHTML = slots.length ? slots.map((t) => `<option>${t}</option>`).join('') : '<option value="">— nicio oră liberă —</option>';
+    $('#bfTimeHint').textContent = slots.length ? `${slots.length} ore libere` : 'Folosiți ora personalizată + „Forțează”';
+  }
+  $('#addBookingBtn').addEventListener('click', () => {
+    $('#bookingForm').reset();
+    $('#bfDate').value = today;
+    $('#bfDate').min = today;
+    $('#bfErrors').classList.add('hidden');
+    $('#bookingModal').classList.remove('hidden');
+    updateTimeOptions();
+  });
+  $('#bfDate').addEventListener('change', updateTimeOptions);
+  $('#bfService').addEventListener('change', updateTimeOptions);
+  $('#bfCancel').addEventListener('click', () => $('#bookingModal').classList.add('hidden'));
+  $('#bookingModal').addEventListener('click', (e) => { if (e.target.id === 'bookingModal') $('#bookingModal').classList.add('hidden'); });
+  $('#bookingForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const body = {
+      serviceId: $('#bfService').value,
+      date: $('#bfDate').value,
+      time: $('#bfTimeCustom').value || $('#bfTime').value,
+      name: $('#bfName').value,
+      phone: $('#bfPhone').value,
+      notes: $('#bfNotes').value,
+      force: $('#bfForce').checked,
+    };
+    try {
+      await api('/api/admin/bookings', { method: 'POST', body });
+      $('#bookingModal').classList.add('hidden');
+      toast('✅ Programare adăugată');
+      refresh();
+    } catch (err) { showErrors($('#bfErrors'), [err.message]); }
+  });
+
+  // ───────── Program ─────────
+  let sched = null;
+  function renderSchedule() {
+    sched = JSON.parse(JSON.stringify(cfg.schedule));
+    $('#slotMinutes').value = sched.slotMinutes;
+    $('#capacity').value = sched.capacity;
+    $('#bookingWindowDays').value = sched.bookingWindowDays;
+    $('#minNoticeHours').value = sched.minNoticeMinutes / 60;
+    renderWeekly();
+    renderDateLists();
+  }
+
+  function renderWeekly() {
+    $('#weekly').innerHTML = DAYS.map(([key, label]) => {
+      const list = sched.weekly[key] || [];
+      const open = list.length > 0;
+      return `<div class="day" data-day="${key}">
+        <div class="name">${label}</div>
+        <label class="switch"><input type="checkbox" data-toggle ${open ? 'checked' : ''}> ${open ? 'Deschis' : 'Închis'}</label>
+        <div class="intervals">
+          ${open ? list.map((iv, i) => {
+            const [a, b] = iv.split('-');
+            return `<span class="iv"><input type="time" value="${a}" data-i="${i}" data-part="0"> – <input type="time" value="${b}" data-i="${i}" data-part="1"><button class="btn icon" data-remove="${i}" title="Șterge intervalul">✕</button></span>`;
+          }).join('') + '<button class="btn small" data-add>+ interval</button>' : '<span class="closed-label">fără programări</span>'}
+        </div>
+      </div>`;
+    }).join('');
+  }
+  $('#weekly').addEventListener('change', (e) => {
+    const row = e.target.closest('.day');
+    if (!row) return;
+    const key = row.dataset.day;
+    if (e.target.matches('[data-toggle]')) {
+      sched.weekly[key] = e.target.checked ? ['09:00-13:00', '14:00-18:00'] : [];
+      renderWeekly();
+    } else if (e.target.matches('input[type=time]')) {
+      const i = +e.target.dataset.i, part = +e.target.dataset.part;
+      const p = sched.weekly[key][i].split('-');
+      p[part] = e.target.value;
+      sched.weekly[key][i] = p.join('-');
+    }
+  });
+  $('#weekly').addEventListener('click', (e) => {
+    const row = e.target.closest('.day');
+    if (!row) return;
+    const key = row.dataset.day;
+    if (e.target.matches('[data-add]')) {
+      const list = sched.weekly[key];
+      const lastEnd = list.length ? list[list.length - 1].split('-')[1] : '09:00';
+      const [h, m] = lastEnd.split(':').map(Number);
+      const start = `${String(Math.min(h + 1, 22)).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      const end = `${String(Math.min(h + 4, 23)).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      list.push(`${start}-${end}`);
+      renderWeekly();
+    } else if (e.target.matches('[data-remove]')) {
+      sched.weekly[key].splice(+e.target.dataset.remove, 1);
+      renderWeekly();
+    }
+  });
+
+  function chip(label, attr, past) {
+    return `<span class="chip ${past ? 'past' : ''}">${label}<button ${attr} title="Șterge">✕</button></span>`;
+  }
+  function renderDateLists() {
+    const closed = [...new Set(sched.closedDates || [])].sort();
+    $('#closedList').innerHTML = closed.length ? closed.map((d) => chip(fmtDate(d) + ' ' + d.slice(0, 4), `data-del-closed="${d}"`, d < today)).join('') : '<span class="closed-label">Nicio zi închisă adăugată.</span>';
+    const sp = Object.entries(sched.specialDates || {}).sort(([a], [b]) => a.localeCompare(b));
+    $('#specialList').innerHTML = sp.length ? sp.map(([d, l]) => chip(`${fmtDate(d)}: ${l.join(', ').replace(/-/g, '–') || 'închis'}`, `data-del-special="${d}"`, d < today)).join('') : '<span class="closed-label">Niciun program special.</span>';
+    const only = [...new Set(sched.onlyDates || [])].sort();
+    $('#onlyList').innerHTML = only.map((d) => chip(fmtDate(d), `data-del-only="${d}"`, d < today)).join('');
+    $('#onlyDatesState').textContent = only.length ? `activ · ${only.length} zile` : 'inactiv';
+    $('#onlyDatesState').className = 'pill ' + (only.length ? 'on' : 'off');
+  }
+  document.addEventListener('click', (e) => {
+    const t = e.target;
+    if (t.dataset.delClosed) { sched.closedDates = sched.closedDates.filter((d) => d !== t.dataset.delClosed); renderDateLists(); }
+    if (t.dataset.delSpecial) { delete sched.specialDates[t.dataset.delSpecial]; renderDateLists(); }
+    if (t.dataset.delOnly) { sched.onlyDates = sched.onlyDates.filter((d) => d !== t.dataset.delOnly); renderDateLists(); }
+  });
+  $('#addClosed').addEventListener('click', () => {
+    const from = $('#closedFrom').value, to = $('#closedTo').value || from;
+    if (!from) return toast('Alegeți data', true);
+    if (to < from) return toast('„Până la” trebuie să fie după „De la”', true);
+    sched.closedDates = sched.closedDates || [];
+    let n = 0;
+    for (let d = from; d <= to && n < 120; d = addDays(d, 1), n++) if (!sched.closedDates.includes(d)) sched.closedDates.push(d);
+    $('#closedFrom').value = $('#closedTo').value = '';
+    renderDateLists();
+    toast(`Adăugat${n > 1 ? `e ${n} zile` : ''} — nu uitați să salvați`);
+  });
+  $('#addSpecial').addEventListener('click', () => {
+    const d = $('#specialDate').value, a = $('#specialFrom').value, b = $('#specialTo').value;
+    if (!d || !a || !b) return toast('Completați data și orele', true);
+    if (a >= b) return toast('Ora de început trebuie să fie înainte de cea de sfârșit', true);
+    sched.specialDates = sched.specialDates || {};
+    sched.specialDates[d] = [...(sched.specialDates[d] || []), `${a}-${b}`];
+    renderDateLists();
+  });
+  $('#addOnly').addEventListener('click', () => {
+    const d = $('#onlyDate').value;
+    if (!d) return toast('Alegeți data', true);
+    sched.onlyDates = [...new Set([...(sched.onlyDates || []), d])];
+    renderDateLists();
+  });
+  $('#clearOnly').addEventListener('click', () => { sched.onlyDates = []; renderDateLists(); });
+
+  $('#saveSchedule').addEventListener('click', async () => {
+    const c = clone();
+    c.schedule = {
+      ...sched,
+      slotMinutes: parseInt($('#slotMinutes').value, 10),
+      capacity: parseInt($('#capacity').value, 10),
+      bookingWindowDays: parseInt($('#bookingWindowDays').value, 10),
+      minNoticeMinutes: Math.round(parseFloat($('#minNoticeHours').value || 0) * 60),
+    };
+    if (await saveConfig(c, $('#schedErrors'))) loadPreview();
+  });
+
+  const STATUS_DAY = { open: ['on', 'Disponibil'], full: ['no-show', 'Complet'], closed: ['off', 'Închis'], holiday: ['cancelled', 'Zi liberă'], 'not-offered': ['off', 'Nu se oferă'], past: ['off', 'Trecut'], 'too-far': ['off', 'Prea departe'] };
+  async function loadPreview() {
+    const service = $('#previewService').value;
+    if (!service) return;
+    try {
+      const days = await api(`/api/admin/preview?service=${encodeURIComponent(service)}&days=14`);
+      const max = Math.max(1, ...days.map((d) => d.slots.length));
+      $('#previewRows').innerHTML = days.map((d) => {
+        const [cls, label] = STATUS_DAY[d.status] || ['off', d.status];
+        return `<tr>
+          <td class="nowrap"><b>${fmtDate(d.date)}</b>${d.date === today ? ' <small>(azi)</small>' : ''}</td>
+          <td><span class="pill ${cls}">${label}</span></td>
+          <td>${d.intervals.length ? d.intervals.join(', ').replace(/-/g, '–') : '<small>—</small>'}</td>
+          <td class="nowrap"><span class="bar"><i style="width:${(d.slots.length / max) * 100}%"></i></span>${d.slots.length} <small>${d.slots.slice(0, 4).join(', ')}${d.slots.length > 4 ? '…' : ''}</small></td>
+          <td>${d.booked || '<small>0</small>'}</td>
+        </tr>`;
+      }).join('');
+    } catch (e) {}
+  }
+  $('#previewService').addEventListener('change', loadPreview);
+
+  // ───────── Servicii ─────────
+  let svcs = [];
+  function renderServices() {
+    svcs = JSON.parse(JSON.stringify(cfg.services));
+    drawServices();
+  }
+  function drawServices() {
+    $('#svcRows').innerHTML = svcs.map((s, i) => `<tr data-i="${i}">
+      <td><label class="switch"><input type="checkbox" data-k="active" ${s.active !== false ? 'checked' : ''}></label></td>
+      <td><input type="text" data-k="emoji" value="${esc(s.emoji)}" style="width:52px;text-align:center"></td>
+      <td><input type="text" data-k="name" value="${esc(s.name)}" style="min-width:170px"></td>
+      <td><input type="text" data-k="shortName" value="${esc(s.shortName)}" style="min-width:110px" maxlength="20"></td>
+      <td><input type="number" data-k="duration" value="${esc(s.duration)}" min="5" step="5" style="width:80px"></td>
+      <td><input type="number" data-k="priceFrom" value="${esc(s.priceFrom)}" min="0" style="width:90px"></td>
+      <td><input type="number" data-k="priceTo" value="${esc(s.priceTo)}" min="0" style="width:90px"></td>
+      <td><textarea data-k="description" style="min-width:200px">${esc(s.description)}</textarea></td>
+      <td><textarea data-k="keywords" style="min-width:200px" placeholder="separate prin virgulă">${esc((s.keywords || []).join(', '))}</textarea></td>
+      <td><button class="btn icon" data-del-svc="${i}" title="Șterge">✕</button></td>
+    </tr>`).join('');
+  }
+  $('#svcRows').addEventListener('input', (e) => {
+    const tr = e.target.closest('tr'), k = e.target.dataset.k;
+    if (!tr || !k) return;
+    const s = svcs[+tr.dataset.i];
+    if (k === 'active') s.active = e.target.checked;
+    else if (['duration', 'priceFrom', 'priceTo'].includes(k)) s[k] = e.target.value === '' ? null : parseInt(e.target.value, 10);
+    else if (k === 'keywords') s.keywords = e.target.value.split(',').map((x) => x.trim()).filter(Boolean);
+    else s[k] = e.target.value;
+  });
+  $('#svcRows').addEventListener('change', (e) => { if (e.target.dataset.k === 'active') svcs[+e.target.closest('tr').dataset.i].active = e.target.checked; });
+  $('#svcRows').addEventListener('click', (e) => {
+    const i = e.target.dataset.delSvc;
+    if (i === undefined) return;
+    if (confirm(`Ștergeți serviciul „${svcs[i].name}”?`)) { svcs.splice(+i, 1); drawServices(); }
+  });
+  $('#addSvc').addEventListener('click', () => {
+    svcs.push({ id: '', emoji: '🦷', name: '', shortName: '', duration: 30, priceFrom: 0, priceTo: 0, description: '', keywords: [], active: true });
+    drawServices();
+    $('#svcRows tr:last-child input[data-k=name]').focus();
+  });
+  const slug = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30);
+  $('#saveServices').addEventListener('click', () => {
+    const c = clone();
+    const used = new Set();
+    c.services = svcs.map((s) => {
+      let id = s.id || slug(s.shortName || s.name) || 'serviciu';
+      while (used.has(id)) id += '-2';
+      used.add(id);
+      return { ...s, id };
+    });
+    saveConfig(c, $('#svcErrors'));
+  });
+
+  // ───────── FAQ ─────────
+  let faqs = [];
+  function renderFaq() {
+    faqs = JSON.parse(JSON.stringify(cfg.faq || []));
+    drawFaq();
+  }
+  function drawFaq() {
+    $('#faqList').innerHTML = faqs.map((f, i) => `<div class="card faq-item" data-i="${i}">
+      <div>
+        <label class="f">Cuvinte cheie <small style="display:inline">(separate prin virgulă)</small><input type="text" data-k="keywords" value="${esc((f.keywords || []).join(', '))}"></label>
+        <label class="f" style="margin-top:10px">Răspuns<textarea data-k="answer">${esc(f.answer)}</textarea></label>
+      </div>
+      <button class="btn icon" data-del-faq="${i}" title="Șterge">✕</button>
+    </div>`).join('') || '<div class="card empty">Nicio întrebare. Adăugați prima.</div>';
+  }
+  $('#faqList').addEventListener('input', (e) => {
+    const item = e.target.closest('.faq-item'), k = e.target.dataset.k;
+    if (!item || !k) return;
+    const f = faqs[+item.dataset.i];
+    if (k === 'keywords') f.keywords = e.target.value.split(',').map((x) => x.trim()).filter(Boolean);
+    else f.answer = e.target.value;
+  });
+  $('#faqList').addEventListener('click', (e) => {
+    const i = e.target.dataset.delFaq;
+    if (i !== undefined && confirm('Ștergeți această întrebare?')) { faqs.splice(+i, 1); drawFaq(); }
+  });
+  $('#addFaq').addEventListener('click', () => { faqs.push({ id: 'faq-' + Date.now(), keywords: [], answer: '' }); drawFaq(); });
+  $('#saveFaq').addEventListener('click', () => {
+    const c = clone();
+    c.faq = faqs.filter((f) => f.keywords.length && f.answer.trim()).map((f, i) => ({ id: f.id || 'faq-' + i, keywords: f.keywords, answer: f.answer }));
+    saveConfig(c, null);
+  });
+
+  // ───────── Mesaje ─────────
+  function renderMessages() {
+    const open = messages.filter((m) => !m.handled).length;
+    $('#msgCount').textContent = open;
+    $('#msgCount').classList.toggle('hidden', !open);
+    $('#msgList').innerHTML = messages.length
+      ? messages.map((m) => `<div class="msg ${m.handled ? 'handled' : ''}">
+          <div class="body"><div class="meta">${new Date(m.createdAt).toLocaleString('ro-RO')} · ${SOURCE[m.channel] || ''} · ${m.name ? esc(m.name) + ' · ' : ''}<a href="tel:${esc(m.phone)}">${esc(m.phone || '—')}</a></div>${esc(m.text)}</div>
+          <label class="switch"><input type="checkbox" data-msg="${esc(m.id)}" ${m.handled ? 'checked' : ''}> Rezolvat</label>
+        </div>`).join('')
+      : '<div class="empty">Niciun mesaj momentan.</div>';
+  }
+  $('#msgList').addEventListener('change', async (e) => {
+    const id = e.target.dataset.msg;
+    if (!id) return;
+    try { await api('/api/admin/messages/' + id, { method: 'PATCH', body: { handled: e.target.checked } }); refresh(); } catch (err) { toast(err.message, true); }
+  });
+
+  // ───────── Clinică ─────────
+  function renderClinic() {
+    $$('[data-c]').forEach((el) => { el.value = cfg.clinic[el.dataset.c] ?? ''; });
+  }
+  $('#saveClinic').addEventListener('click', () => {
+    const c = clone();
+    $$('[data-c]').forEach((el) => { c.clinic[el.dataset.c] = el.value.trim(); });
+    c.clinic.bookingCodePrefix = (c.clinic.bookingCodePrefix || 'PR').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4) || 'PR';
+    saveConfig(c, $('#clinicErrors'));
+  });
+
+  // ───────── Avansat ─────────
+  $('#saveJson').addEventListener('click', () => {
+    let parsed;
+    try { parsed = JSON.parse($('#jsonEditor').value); } catch (e) { return showErrors($('#jsonErrors'), ['JSON invalid: ' + e.message]); }
+    saveConfig(parsed, $('#jsonErrors'));
+  });
+  $('#downloadJson').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(cfg, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `clinic-config-${today}.json`;
+    a.click();
+  });
+
+  if (token) start();
+})();
+</script>
+</body>
+</html>

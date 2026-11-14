@@ -1,0 +1,222 @@
+{
+  "clinic": {
+    "name": "Clinica Dentară Zâmbet",
+    "botName": "Ana",
+    "address": "Str. Exemplu nr. 10, Sector 1, București",
+    "phone": "0721 000 000",
+    "urgentPhone": "0721 000 001",
+    "email": "contact@clinica-exemplu.ro",
+    "website": "https://clinica-exemplu.ro",
+    "mapsUrl": "https://maps.google.com/?q=Bucuresti",
+    "timezone": "Europe/Bucharest",
+    "currency": "lei",
+    "bookingCodePrefix": "ZB"
+  },
+
+  "schedule": {
+    "slotMinutes": 30,
+    "capacity": 1,
+    "bookingWindowDays": 30,
+    "minNoticeMinutes": 120,
+    "weekly": {
+      "luni": ["09:00-13:00", "14:00-19:00"],
+      "marti": ["09:00-13:00", "14:00-19:00"],
+      "miercuri": ["09:00-13:00", "14:00-19:00"],
+      "joi": ["09:00-13:00", "14:00-19:00"],
+      "vineri": ["09:00-13:00", "14:00-17:00"],
+      "sambata": ["09:00-13:00"],
+      "duminica": []
+    },
+    "closedDates": [
+      "2026-11-30",
+      "2026-12-01",
+      "2026-12-25",
+      "2026-12-26",
+      "2027-01-01",
+      "2027-01-02",
+      "2027-01-06",
+      "2027-01-07"
+    ],
+    "specialDates": {
+      "2026-12-24": ["09:00-12:00"],
+      "2026-12-31": ["09:00-12:00"]
+    },
+    "onlyDates": []
+  },
+
+  "services": [
+    {
+      "id": "consultatie",
+      "emoji": "🩺",
+      "name": "Consultație",
+      "shortName": "Consultație",
+      "duration": 30,
+      "priceFrom": 150,
+      "priceTo": 200,
+      "description": "Examinare completă, diagnostic și plan de tratament personalizat.",
+      "keywords": ["consult", "consultatie", "control", "verificare", "evaluare", "plan de tratament", "nu stiu", "prima vizita", "check"],
+      "active": true
+    },
+    {
+      "id": "detartraj",
+      "emoji": "✨",
+      "name": "Detartraj și periaj profesional",
+      "shortName": "Detartraj",
+      "duration": 60,
+      "priceFrom": 250,
+      "priceTo": 350,
+      "description": "Îndepărtarea tartrului, periaj profesional și airflow pentru pete.",
+      "keywords": ["detartraj", "tartru", "curatare", "curatenie", "igienizare", "periaj profesional", "airflow", "pete"],
+      "active": true
+    },
+    {
+      "id": "obturatie",
+      "emoji": "🦷",
+      "name": "Plombă (obturație)",
+      "shortName": "Plombă",
+      "duration": 60,
+      "priceFrom": 250,
+      "priceTo": 450,
+      "description": "Tratarea cariilor cu materiale compozite estetice.",
+      "keywords": ["plomba", "plombe", "obturatie", "carie", "carii", "gaura", "s-a spart plomba", "mi-a cazut plomba"],
+      "active": true
+    },
+    {
+      "id": "canal",
+      "emoji": "🔬",
+      "name": "Tratament de canal",
+      "shortName": "Tratament canal",
+      "duration": 90,
+      "priceFrom": 500,
+      "priceTo": 1200,
+      "description": "Tratament endodontic sub microscop, în una sau mai multe ședințe.",
+      "keywords": ["canal", "tratament de canal", "endodontic", "nerv", "devitalizare", "omorat nervul"],
+      "active": true
+    },
+    {
+      "id": "extractie",
+      "emoji": "🪥",
+      "name": "Extracție dentară",
+      "shortName": "Extracție",
+      "duration": 60,
+      "priceFrom": 250,
+      "priceTo": 800,
+      "description": "Extracții simple sau chirurgicale, inclusiv molari de minte.",
+      "keywords": ["extractie", "scos", "scot", "scoate", "scoatem", "masea de minte", "molar de minte", "dinte de minte", "extrag"],
+      "active": true
+    },
+    {
+      "id": "albire",
+      "emoji": "💎",
+      "name": "Albire profesională",
+      "shortName": "Albire",
+      "duration": 90,
+      "priceFrom": 1200,
+      "priceTo": 1800,
+      "description": "Albire în cabinet, cu rezultate vizibile încă din prima ședință.",
+      "keywords": ["albire", "albit", "albi", "dinti albi", "whitening", "dinti galbeni"],
+      "active": true
+    },
+    {
+      "id": "implant",
+      "emoji": "🔩",
+      "name": "Implant dentar (consultație)",
+      "shortName": "Implant",
+      "duration": 30,
+      "priceFrom": 200,
+      "priceTo": 200,
+      "description": "Evaluare pentru implant, cu analiza radiografiei și plan de tratament.",
+      "keywords": ["implant", "implanturi", "dinte lipsa", "lipsa dinte", "dinti lipsa", "all on 4", "all-on-4"],
+      "active": true
+    },
+    {
+      "id": "ortodontie",
+      "emoji": "😁",
+      "name": "Ortodonție / aparat dentar (consultație)",
+      "shortName": "Ortodonție",
+      "duration": 30,
+      "priceFrom": 200,
+      "priceTo": 200,
+      "description": "Evaluare pentru aparat dentar fix, mobil sau gutiere transparente.",
+      "keywords": ["aparat", "aparat dentar", "ortodontie", "ortodont", "gutiere", "invisalign", "dinti strambi", "strambi"],
+      "active": true
+    },
+    {
+      "id": "copii",
+      "emoji": "🧸",
+      "name": "Stomatologie pentru copii",
+      "shortName": "Copii",
+      "duration": 30,
+      "priceFrom": 150,
+      "priceTo": 300,
+      "description": "Consultații și tratamente blânde pentru cei mici, într-un mediu prietenos.",
+      "keywords": ["copil", "copii", "copilul", "fetita", "baietel", "pedodontie", "dinti de lapte", "pentru copil"],
+      "active": true
+    },
+    {
+      "id": "urgenta",
+      "emoji": "🚑",
+      "name": "Urgență / durere dentară",
+      "shortName": "Urgență",
+      "duration": 30,
+      "priceFrom": 200,
+      "priceTo": 400,
+      "description": "Intervenție rapidă pentru durere, umflătură sau dinte fracturat.",
+      "keywords": ["urgenta", "urgent", "durere", "ma doare", "umflat", "abces"],
+      "active": true
+    }
+  ],
+
+  "faq": [
+    {
+      "id": "adresa",
+      "keywords": ["adresa", "unde sunteti", "unde va aflati", "locatie", "locatia", "harta", "cum ajung", "metrou", "unde e clinica"],
+      "answer": "📍 Ne găsiți la *{address}*.\n🗺️ Hartă: {mapsUrl}"
+    },
+    {
+      "id": "parcare",
+      "keywords": ["parcare", "parchez", "parcam", "masina", "loc de parcare"],
+      "answer": "🚗 Avem locuri de parcare gratuite pentru pacienți în fața clinicii. Dacă sunt ocupate, în apropiere există și o parcare publică."
+    },
+    {
+      "id": "plata",
+      "keywords": ["plata", "platesc", "card", "cash", "numerar", "rate", "in rate", "factura", "chitanta", "pos"],
+      "answer": "💳 Acceptăm plata *cash* și *card* (inclusiv contactless). Pentru tratamente mai ample (implanturi, ortodonție, lucrări protetice) oferim și *plata în rate*. Emitem factură la cerere."
+    },
+    {
+      "id": "asigurare",
+      "keywords": ["asigurare", "asigurari", "cas", "casa de asigurari", "decontat", "decontare", "gratuit", "compensat", "abonament", "medlife", "regina maria", "signal iduna"],
+      "answer": "📄 Lucrăm cu mai multe asigurări private de sănătate. Pentru detalii despre decontare, vă rugăm să ne spuneți numele asiguratorului sau să sunați la *{phone}*, iar colegii de la recepție verifică imediat."
+    },
+    {
+      "id": "anestezie",
+      "keywords": ["anestezie", "anestezic", "o sa doara", "va doare", "dureros", "doare tratamentul", "doare extractia", "frica", "mi-e frica", "imi e frica", "teama", "sedare"],
+      "answer": "😌 Înțelegem perfect! Toate procedurile se fac cu *anestezie locală*, astfel încât să nu simțiți durere. Pentru pacienții anxioși discutăm la consultație și varianta de sedare. Medicii noștri vă explică fiecare pas înainte."
+    },
+    {
+      "id": "radiografie",
+      "keywords": ["radiografie", "radiografia", "panoramica", "rx", "ct dentar", "tomografie"],
+      "answer": "🩻 Facem radiografii digitale direct în clinică (cu iradiere minimă). Dacă aveți o radiografie recentă (sub 6 luni), vă rugăm să o aduceți la programare."
+    },
+    {
+      "id": "garantie",
+      "keywords": ["garantie", "garantia", "garantat"],
+      "answer": "✅ Oferim garanție pentru lucrările efectuate, cu condiția controalelor periodice. Durata exactă depinde de tipul lucrării și v-o comunică medicul."
+    },
+    {
+      "id": "medici",
+      "keywords": ["medici", "medicul", "doctorul", "doctori", "echipa", "specialist", "specialisti", "cine lucreaza"],
+      "answer": "👩‍⚕️ Echipa noastră include medici specialiști în stomatologie generală, endodonție, chirurgie, implantologie, ortodonție și pedodonție. Dacă doriți un anumit medic, menționați acest lucru la programare."
+    },
+    {
+      "id": "pregatire",
+      "keywords": ["ce sa aduc", "ce trebuie sa aduc", "cum ma pregatesc", "pregatire", "mananc inainte", "pot sa mananc", "inainte de programare"],
+      "answer": "📝 Înainte de programare:\n• Aduceți un act de identitate și radiografii recente, dacă aveți\n• Spuneți-ne despre medicamentele pe care le luați\n• Puteți mânca normal înainte (cu excepția cazului în care medicul v-a spus altfel)\n• Vă rugăm să ajungeți cu 10 minute mai devreme"
+    },
+    {
+      "id": "anulare-politica",
+      "keywords": ["intarzii", "intarziere", "nu pot ajunge", "politica de anulare"],
+      "answer": "⏱️ Dacă nu puteți ajunge, vă rugăm să ne anunțați cu cel puțin *24 de ore* înainte — scrieți „anulare” aici sau sunați la *{phone}*. Dacă întârziați peste 15 minute, s-ar putea să fie nevoie să reprogramăm."
+    }
+  ]
+}

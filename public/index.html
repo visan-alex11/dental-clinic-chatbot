@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clinica Dentară Zâmbet — demo chatbot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --c: #0f766e; --c-dark: #0b5a54; --ink: #10201e; --muted: #5b6b69; --bg: #f6f3ee; --card: #fff; --line: #e6e0d6; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Inter, system-ui, sans-serif; color: var(--ink); background: var(--bg); line-height: 1.6; }
+    a { color: inherit; }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
+    .logo { font-family: Fraunces, serif; font-size: 22px; font-weight: 600; display: flex; gap: 10px; align-items: center; }
+    .logo span { width: 34px; height: 34px; border-radius: 10px; background: var(--c); color: #fff; display: grid; place-items: center; font-size: 18px; }
+    nav ul { display: flex; gap: 28px; list-style: none; font-size: 15px; color: var(--muted); }
+    nav .cta { background: var(--ink); color: #fff; padding: 10px 18px; border-radius: 999px; text-decoration: none; font-weight: 500; font-size: 14px; }
+    .hero { display: grid; grid-template-columns: 1.15fr .85fr; gap: 56px; align-items: center; padding: 56px 0 80px; }
+    .eyebrow { display: inline-block; font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--c); margin-bottom: 18px; }
+    h1 { font-family: Fraunces, serif; font-weight: 500; font-size: clamp(38px, 5vw, 60px); line-height: 1.06; letter-spacing: -.02em; margin-bottom: 22px; }
+    h1 em { font-style: italic; color: var(--c); }
+    .lead { font-size: 18px; color: var(--muted); max-width: 520px; margin-bottom: 32px; }
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn { border: 0; font: inherit; font-weight: 600; padding: 14px 24px; border-radius: 999px; cursor: pointer; text-decoration: none; font-size: 15px; }
+    .btn.primary { background: var(--c); color: #fff; }
+    .btn.primary:hover { background: var(--c-dark); }
+    .btn.ghost { background: transparent; border: 1.5px solid var(--line); color: var(--ink); }
+    .card { background: var(--card); border-radius: 28px; padding: 32px; box-shadow: 0 30px 60px -30px rgba(16,32,30,.25); border: 1px solid var(--line); }
+    .card h3 { font-family: Fraunces, serif; font-weight: 500; font-size: 22px; margin-bottom: 18px; }
+    .hours { list-style: none; font-size: 15px; }
+    .hours li { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px dashed var(--line); }
+    .hours li:last-child { border: 0; }
+    .hours b { font-weight: 500; }
+    .stats { display: flex; gap: 36px; margin-top: 44px; }
+    .stats div { font-size: 14px; color: var(--muted); }
+    .stats strong { display: block; font-family: Fraunces, serif; font-size: 30px; font-weight: 500; color: var(--ink); }
+    section.services { padding: 80px 0; border-top: 1px solid var(--line); }
+    h2 { font-family: Fraunces, serif; font-weight: 500; font-size: 36px; letter-spacing: -.01em; margin-bottom: 36px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .svc { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 26px; }
+    .svc .ic { font-size: 26px; margin-bottom: 14px; }
+    .svc h4 { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+    .svc p { font-size: 14.5px; color: var(--muted); }
+    .svc .price { margin-top: 14px; font-size: 14px; font-weight: 600; color: var(--c); }
+    .embed { background: var(--ink); color: #d9e6e3; border-radius: 24px; padding: 36px; margin: 0 0 80px; display: grid; grid-template-columns: 1fr 1.2fr; gap: 32px; align-items: center; }
+    .embed h3 { font-family: Fraunces, serif; font-weight: 500; font-size: 26px; color: #fff; margin-bottom: 10px; }
+    .embed p { font-size: 15px; color: #a8bcb8; }
+    .embed code { display: block; background: #1b302d; border-radius: 14px; padding: 18px 20px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13.5px; color: #8de0d4; white-space: pre-wrap; word-break: break-all; }
+    footer { border-top: 1px solid var(--line); padding: 28px 0 40px; font-size: 14px; color: var(--muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    @media (max-width: 860px) {
+      nav ul { display: none; }
+      .hero, .embed { grid-template-columns: 1fr; gap: 32px; padding-top: 24px; }
+      .grid { grid-template-columns: 1fr; }
+      .stats { gap: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <div class="logo"><span>✦</span> Clinica Zâmbet</div>
+      <ul><li>Servicii</li><li>Echipa</li><li>Prețuri</li><li>Contact</li></ul>
+      <a class="cta" href="#" onclick="openBot(event)">Programează-te</a>
+    </nav>
+
+    <section class="hero">
+      <div>
+        <span class="eyebrow">Stomatologie modernă · București</span>
+        <h1>Un zâmbet sănătos, <em>fără stres</em> și fără așteptare.</h1>
+        <p class="lead">Faceți-vă programarea în mai puțin de un minut, direct aici sau pe WhatsApp. Asistentul nostru virtual vă răspunde oricând, chiar și noaptea.</p>
+        <div class="actions">
+          <button class="btn primary" onclick="openBot(event)">📅 Fă o programare</button>
+          <a class="btn ghost" href="tel:0721000000">Sună-ne: 0721 000 000</a>
+        </div>
+        <div class="stats">
+          <div><strong>12+</strong>ani de experiență</div>
+          <div><strong>8.000</strong>pacienți mulțumiți</div>
+          <div><strong>4.9★</strong>recenzii Google</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Program</h3>
+        <ul class="hours">
+          <li><b>Luni – Joi</b><span>09:00 – 19:00</span></li>
+          <li><b>Vineri</b><span>09:00 – 17:00</span></li>
+          <li><b>Sâmbătă</b><span>09:00 – 13:00</span></li>
+          <li><b>Duminică</b><span>Închis</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="services">
+      <h2>Servicii principale</h2>
+      <div class="grid">
+        <div class="svc"><div class="ic">🩺</div><h4>Consultație</h4><p>Diagnostic complet și plan de tratament personalizat.</p><div class="price">de la 150 lei</div></div>
+        <div class="svc"><div class="ic">✨</div><h4>Detartraj</h4><p>Igienizare profesională, periaj și airflow.</p><div class="price">de la 250 lei</div></div>
+        <div class="svc"><div class="ic">💎</div><h4>Albire</h4><p>Rezultate vizibile încă din prima ședință.</p><div class="price">de la 1200 lei</div></div>
+      </div>
+    </section>
+
+    <section class="embed">
+      <div>
+        <h3>Aceasta este o pagină demo</h3>
+        <p>Chatbot-ul este în colțul din dreapta jos. Pentru a-l pune pe site-ul real al clinicii, adăugați o singură linie înainte de <b>&lt;/body&gt;</b>:</p>
+      </div>
+      <code>&lt;script src="https://ADRESA-SERVERULUI/widget.js" defer&gt;&lt;/script&gt;</code>
+    </section>
+
+    <footer>
+      <span>© Clinica Dentară Zâmbet · Str. Exemplu nr. 10, București</span>
+      <a href="/admin">Administrare →</a>
+    </footer>
+  </div>
+
+  <script>
+    function openBot(e) {
+      e.preventDefault();
+      var host = document.getElementById('dental-chat-widget');
+      var btn = host && host.shadowRoot.querySelector('.launcher');
+      if (btn && !host.shadowRoot.querySelector('.root').classList.contains('open')) btn.click();
+    }
+  </script>
+  <script src="/widget.js" defer></script>
+</body>
+</html>
